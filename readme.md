@@ -29,7 +29,7 @@ I'll address data quality later, but suffice it to say for now that I trust that
 
 **Relevant Code Files**: scrape.py
 
-**Relevant Data Files**: ./scrapedata/\*.py
+**Relevant Data Files**: ./scrapedata/\*.csv
 
 ### Munge
 
@@ -41,9 +41,38 @@ To prepare data for analysis, I'll put relevant data in a Pandas DataFrame. This
 * Player's team winning percentage
 * Whether player's team made playoffs or not (1 or 0)
 
+A 'voting' file looks like:
+> Rank,Player,Age,Tm,First,Pts Won,Pts Max,Share,G,MP,PTS,TRB,AST,STL,BLK,FG%,3P%,FT%,WS,WS/48
+> 1,Shaquille O'Neal,27,LAL,120.0,1207.0,1210,0.998,79,40.0,29.7,13.6,3.8,0.5,3.0,.574,.000,.524,18.6,.283
+> 2,Kevin Garnett,23,MIN,0.0,408.0,1210,0.337,81,40.0,22.9,11.8,5.0,1.5,1.6,.497,.370,.765,11.6,.172
+
+A 'standings' file looks like:
+> Eastern Conference,W,L,W/L%,GB,PS/G,PA/G,SRS
+> Atlantic Division
+> Miami Heat* (2),52,30,.634,—,94.4,91.3,2.75
+> New York Knicks* (3),50,32,.610,2.0,92.1,90.7,1.30
+> Philadelphia 76ers* (5),49,33,.598,3.0,94.8,93.4,1.02
+
+We can create a DataFrame of the voting data, to which we will append additional fields, as well as DataFrames for each of the standings data files.
+
+For each of the 'standings' DataFrames, we can modify each record:
+* Append a 'games' column by adding wins and losses
+* Append a 'win_pct' column by dividing wins by games
+* Append a 'playoffs' column, using 1 if a team name has an asterisk, 0 if not
+* Use regular expression parsing to truncate a team's name to remove non-alphanumeric characters, except separating spaces
+
+Then, merge these two DataFrames. Once we have our formulated 'standings' DataFrames, we can alter the 'voting' DataFrame as follows:
+* Append a 'year' field, obtained from the file name
+* Append the columns we created in our 'standings' DataFrames, joining using a dictionary to match team acronym (e.g. 'LAL') to team name ('Los Angeles Lakers')
+* Create a 'pct_games' field by dividing player games played by total team games
+
+Lastly, in case we use them, rewrite the 'rankings' field to account for ties. Any players who receive the same number of total points should have the same rank.
+
+Do this for each year, and merge them to create our final DataFrame object.
+
 **Relevant Code Files**: munge.py
 
-**Relevant Data Files**:
+**Relevant Data Files**: ./scrapedata/\*.csv
 
 ## Analysis/Findings
 
