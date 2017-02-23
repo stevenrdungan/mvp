@@ -16,7 +16,7 @@ Data was obtained from basketball-reference.com. The following data was captured
 
 A third piece of data that has yet to be collected:
 
-* Player statistics for the 2017 (current) seasons
+* Player statistics for the 2017 (current) season
 
 Basketball Reference has no scrape API that I'm aware of, but using Requests and BeautifulSoup4 to request and parse the relative data was relatively straightforward.
 
@@ -51,6 +51,6 @@ To replicate:
 1. Clone this directory to your local machine
 2. Run *scrape.py* to retrieve raw data
 
-**Required Software Packages/Libraries: Python3, BeautifulSoup4, Requests
+**Required Software Packages/Libraries:** Python3, BeautifulSoup4, Requests
 
 Or, you can just download the appropriate Anaconda package.
