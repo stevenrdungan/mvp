@@ -4,20 +4,20 @@ import pandas as pd
 import numpy as np
 
 # key is 3LA, value is team name in standings
-teams = {'DAL':'Dallas Mavericks',
-'DET':'Detroit Pistons',
-'IND':'Indiana Pacers',
-'LAL':'Los Angeles Lakers',
-'MIA':'Miami Heat',
-'MIN':'Minnesota Timberwolves',
-'ORL':'Orlando Magic',
-'PHI':'Philadelphia 76ers',
-'PHO':'Phoenix Suns',
-'SAC':'Sacramento Kings',
-'SAS':'San Antonio Spurs',
-'SEA':'Seattle SuperSonics',
-'TOR':'Toronto Raptors',
-'UTA':'Utah Jazz'}
+teams = {'Dallas Mavericks':'DAL',
+'Detroit Pistons':'DET',
+'Indiana Pacers':'IND',
+'Los Angeles Lakers':'LAL',
+'Miami Heat':'MIA',
+'Minnesota Timberwolves':'MIN',
+'Orlando Magic':'ORL',
+'Philadelphia 76ers':'PHI',
+'Phoenix Suns':'PHO',
+'Sacramento Kings':'SAC',
+'San Antonio Spurs':'SAS',
+'Seattle SuperSonics':'SEA',
+'Toronto Raptors':'TOR',
+'Utah Jazz':'UTA'}
 
 year = 2000 # change this to loop through range!
 directory = "/Users/stevendungan/mvp/scrapedata"
@@ -32,3 +32,12 @@ for filename in os.listdir("/Users/stevendungan/mvp/scrapedata"):
         east = pd.read_csv(os.path.join(directory,filename))
     elif re.match(f"[a-z]+s_standings_W_{year}.csv", filename):
         west = pd.read_csv(os.path.join(directory,filename))
+
+# assemble standings dataframe
+east = east.rename(columns = {'Eastern Conference':'Team'})
+west = west.rename(columns = {'Western Conference':'Team'})
+frames = [east, west]
+# this will remove the Division/Conference header lines
+standings = pd.concat(frames).dropna()
+standings = standings.loc[:,['Team','W','L','W/L%']]
+standings['playoffs'] = standings['Team'].str.contains('\*').astype(int)
