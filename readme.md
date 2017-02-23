@@ -35,6 +35,8 @@ I'll address data quality later, but suffice it to say for now that I trust that
 
 To prepare data for analysis, I'll put relevant data in a Pandas DataFrame. This DataFrame should be composed of Series' for each record in the MVP award voting data. In addition to the fields already present for each player record, the following fields need to be appended:
 
+* % of team's games played
+* % of voting points won
 * Year of season
 * Player's team winning percentage
 * Whether player's team made playoffs or not (1 or 0)
