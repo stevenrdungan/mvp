@@ -1,3 +1,4 @@
+import os
 from bs4 import BeautifulSoup
 import requests
 import csv
@@ -12,7 +13,15 @@ def get_response(url):
     except requests.exceptions.RequestException as e:
         print(e)
     return None
-        
+
+
+# create directory for data
+directory = "/Users/stevendungan/mvp/scrapedata"
+if not os.path.exists(directory):
+    print(f"Creating directory \'{directory}\'")
+    os.makedirs(directory)
+
+
 # scrape MVP voting data 2000-16
 for year in range(2000,2017):
     data = []
@@ -39,10 +48,11 @@ for year in range(2000,2017):
         cols = [ele.text.strip() for ele in row.find_all('td')]
         line += [ele for ele in cols]
         data.append([ele for ele in line if ele])
-    fname = f"/Users/stevendungan/mvp/scrapedata/mvp_voting_{year}.csv"
+    fname = f"{directory}/mvp_voting_{year}.csv"
     with open(fname, 'w') as file:
         wr = csv.writer(file)
         wr.writerows(data)
+
 
 # scrape standings data 2000-16
 for year in range(2000,2017):
@@ -56,16 +66,14 @@ for year in range(2000,2017):
         hrow = table_head.find('tr')
         hcols = hrow.find_all('th')
         hcols = [ele.text.strip() for ele in hcols]
-        data.append([ele for ele in hcols if ele])        
+        data.append([ele for ele in hcols if ele])
         table_body = table.find('tbody')
         rows = table_body.find_all('tr')
         for row in rows:
             cols = [ele.text.strip() for ele in row.find_all('th')]
             cols += [ele.text.strip() for ele in row.find_all('td')]
             data.append([ele for ele in cols if ele])
-        fname = f"/Users/stevendungan/mvp/scrapedata/{tid}_{year}.csv"
+        fname = f"{directory}/{tid}_{year}.csv"
         with open(fname, 'w') as file:
             wr = csv.writer(file)
             wr.writerows(data)
-
-    
