@@ -2,6 +2,9 @@
 
 ## Overview
 
+
+
+
 ## Data
 
 ### Scrape
@@ -23,13 +26,31 @@ I had trouble scraping the 'expanded standings' table using BeautifulSoup4, whic
 
 I'll address data quality later, but suffice it to say for now that I trust that the data I did pull is accurate.
 
+
 **Relevant Code Files**: scrape.py
+
 **Relevant Data Files**: ./scrapedata/\*.py
- 
+
 ### Munge
 
-## Findings
+
+
+## Analysis/Findings
+
+
 
 ## Comments
 
 ### Data Quality
+
+
+
+## Instructions
+
+To replicate:
+1. Clone this directory to your local machine
+2. Run *scrape.py* to retrieve raw data
+
+**Required Software Packages/Libraries: Python3, BeautifulSoup4, Requests
+
+Or, you can just download the appropriate Anaconda package.
