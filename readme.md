@@ -12,7 +12,7 @@
 Data was obtained from basketball-reference.com. The following data was captured:
 
 * MVP award voting data for the 2000-16 seasons
-* Team final standings data for the 200-16 seasons
+* Team final standings data for the 2000-16 seasons
 
 A third piece of data that has yet to be collected:
 
@@ -69,7 +69,7 @@ Do this for each year, and merge them to create our final DataFrame object. We c
 
 **Relevant Code Files**: munge.py
 
-**Relevant Data Files**: ./output/\dataframe.csv
+**Relevant Data Files**: ./output/dataframe.csv
 
 ## Analysis/Findings
 

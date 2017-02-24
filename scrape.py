@@ -16,11 +16,11 @@ def get_response(url):
 
 
 # create directory for data
-directory = "/Users/stevendungan/mvp/scrapedata"
+directory = os.path.join(os.getcwd(), 'scrapedata')
+print(f"directory is '{directory}'")
 if not os.path.exists(directory):
     print(f"Creating directory \'{directory}\'")
     os.makedirs(directory)
-
 
 # scrape MVP voting data 2000-16
 for year in range(2000,2017):

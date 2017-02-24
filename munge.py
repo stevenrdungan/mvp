@@ -44,11 +44,11 @@ teams = {'Atlanta Hawks':'ATL',
 
 
 data = pd.DataFrame()   # this will be our dataset
-directory = "/Users/stevendungan/mvp/scrapedata"
+directory = os.path.join(os.getcwd(),'scrapedata')
 
 for year in range(2000,2017):
     voting, east, west = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
-    for filename in os.listdir("/Users/stevendungan/mvp/scrapedata"):
+    for filename in os.listdir(directory):
         # read voting data into dataframe
         if re.match(f"mvp_voting_{year}.csv", filename):
             voting = pd.read_csv(os.path.join(directory,filename))
@@ -83,3 +83,10 @@ for year in range(2000,2017):
 
 data = data.sort_values('Share', ascending=False)
 data = data.drop(['Rank','First','Pts Won','Pts Max','W','L','games'], axis=1).reset_index(drop=True)
+
+# output to csv
+outdir = os.path.join(os.getcwd(),'output')
+if not os.path.exists(outdir):
+    print(f"Creating directory \'{outdir}\'")
+    os.makedirs(outdir)
+data.to_csv(outdir + '/dataframe.csv')
