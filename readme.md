@@ -36,8 +36,6 @@ I'll address data quality later, but suffice it to say for now that I trust that
 To prepare data for analysis, I'll put relevant data in a Pandas DataFrame. This DataFrame should be composed of Series' for each record in the MVP award voting data. In addition to the fields already present for each player record, the following fields need to be appended:
 
 * % of team's games played
-* % of voting points won
-* Year of season
 * Player's team winning percentage
 * Whether player's team made playoffs or not (1 or 0)
 
@@ -61,18 +59,17 @@ For each of the 'standings' DataFrames, we can modify each record:
 * Append a 'playoffs' column, using 1 if a team name has an asterisk, 0 if not
 * Use regular expression parsing to truncate a team's name to remove non-alphanumeric characters, except separating spaces
 
+We can also do some cleaning of the 'voting' DataFrame:
+* remove any records for players with a team of 'TOT' (indicating they played for multiple teams that season)
 Then, merge these two DataFrames. Once we have our formulated 'standings' DataFrames, we can alter the 'voting' DataFrame as follows:
-* Append a 'year' field, obtained from the file name
 * Append the columns we created in our 'standings' DataFrames, joining using a dictionary to match team acronym (e.g. 'LAL') to team name ('Los Angeles Lakers')
 * Create a 'pct_games' field by dividing player games played by total team games
 
-Lastly, in case we use them, rewrite the 'rankings' field to account for ties. Any players who receive the same number of total points should have the same rank.
-
-Do this for each year, and merge them to create our final DataFrame object.
+Do this for each year, and merge them to create our final DataFrame object. We can then sort by 'Share' (share of voting points won), and drop any extraneous columns.
 
 **Relevant Code Files**: munge.py
 
-**Relevant Data Files**: ./scrapedata/\*.csv
+**Relevant Data Files**: ./output/\dataframe.csv
 
 ## Analysis/Findings
 
@@ -89,7 +86,8 @@ Do this for each year, and merge them to create our final DataFrame object.
 To replicate:
 1. Clone this directory to your local machine
 2. Run *scrape.py* to retrieve raw data
+3. Run *munge.py* to create final DataFrame and output file
 
-**Required Software Packages/Libraries:** Python3, BeautifulSoup4, Requests
+**Required Software Packages/Libraries:** Python3, BeautifulSoup4, Requests, Pandas, Numpy
 
-Or, you can just download the appropriate Anaconda package.
+Or, you can just install the appropriate Anaconda package.

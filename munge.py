@@ -83,10 +83,3 @@ for year in range(2000,2017):
 
 data = data.sort_values('Share', ascending=False)
 data = data.drop(['Rank','First','Pts Won','Pts Max','W','L','games'], axis=1).reset_index(drop=True)
-
-# write to output
-output = "/Users/stevendungan/mvp/output"
-if not os.path.exists(output):
-    print(f"Creating directory \'{output}\'")
-    os.makedirs(output)
-data.to_csv(os.path.join(output,'dataframe.csv'))
