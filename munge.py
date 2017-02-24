@@ -3,49 +3,86 @@ import re
 import pandas as pd
 import numpy as np
 
-#FINISH ADDING TEAMS!
 # key is 3LA, value is team name in standings
 # it is okay if there are duplicate values, because
 # they will never arise in the same season
 # e.g. Charlotte Hornets, Charlotte Bobcats
-teams = {'Dallas Mavericks':'DAL',
+teams = {'Atlanta Hawks':'ATL',
+'Boston Celtics':'BOS',
+'Charlotte Bobcats':'CHA',
+'Charlotte Hornets':'CHA',
+'Chicago Bulls':'CHI',
+'Cleveland Cavaliers':'CLE',
+'Dallas Mavericks':'DAL',
+'Denver Nuggets':'DEN',
 'Detroit Pistons':'DET',
+'Golden State Warriors':'GSW',
+'Houston Rockets':'HOU',
 'Indiana Pacers':'IND',
+'Los Angeles Clippers':'LAC',
 'Los Angeles Lakers':'LAL',
+'Memphis Grizzlies':'MEM',
 'Miami Heat':'MIA',
+'Milwaukee Bucks':'MIL',
 'Minnesota Timberwolves':'MIN',
+'New Jersey Nets':'NJN',
+'New Orleans Hornets':'NOH',
+'New Orleans Pelicans':'NOP',
 'New York Knicks':'NYK',
 'Orlando Magic':'ORL',
 'Philadelphia 76ers':'PHI',
 'Phoenix Suns':'PHO',
+'Portland Trail Blazers':'POR',
 'Sacramento Kings':'SAC',
 'San Antonio Spurs':'SAS',
 'Seattle SuperSonics':'SEA',
 'Toronto Raptors':'TOR',
-'Utah Jazz':'UTA'}
+'Utah Jazz':'UTA',
+'Vancouver Grizzlies':'VAN',
+'Washington Wizards':'WAS'}
 
-year = 2000 # change this to loop through range!
+
+data = pd.DataFrame()   # this will be our dataset
 directory = "/Users/stevendungan/mvp/scrapedata"
-voting, east, west = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
-for filename in os.listdir("/Users/stevendungan/mvp/scrapedata"):
-    # read voting data into dataframe
-    if re.match(f"mvp_voting_{year}.csv", filename):
-        voting = pd.read_csv(os.path.join(directory,filename))
-    # read standings data into dataframe
-    elif re.match(f"[a-z]+s_standings_E_{year}.csv", filename):
-        east = pd.read_csv(os.path.join(directory,filename))
-    elif re.match(f"[a-z]+s_standings_W_{year}.csv", filename):
-        west = pd.read_csv(os.path.join(directory,filename))
+for year in range(2000,2017):
+    voting, east, west = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    for filename in os.listdir("/Users/stevendungan/mvp/scrapedata"):
+        # read voting data into dataframe
+        if re.match(f"mvp_voting_{year}.csv", filename):
+            voting = pd.read_csv(os.path.join(directory,filename))
+        # read standings data into dataframe
+        elif re.match(f"[a-z]+s_standings_E_{year}.csv", filename):
+            east = pd.read_csv(os.path.join(directory,filename))
+        elif re.match(f"[a-z]+s_standings_W_{year}.csv", filename):
+            west = pd.read_csv(os.path.join(directory,filename))
 
-# assemble standings dataframe
-east = east.rename(columns = {'Eastern Conference':'Team'})
-west = west.rename(columns = {'Western Conference':'Team'})
-frames = [east, west]
-# this will remove the Division/Conference header lines
-standings = pd.concat(frames).dropna()
-standings = standings.loc[:,['Team','W','L','W/L%']]
-standings['playoffs'] = standings['Team'].str.contains('\*').astype(int)
-standings['games'] = standings['W'] + standings ['L']
-standings['Team'] = standings['Team'].str.replace('[^\w\s]+','').str.replace('\d+\s*$','')
-standings = standings.replace({'Team':teams}, regex=True)
+    # assemble standings dataframe
+    east = east.rename(columns = {'Eastern Conference':'Tm'})
+    west = west.rename(columns = {'Western Conference':'Tm'})
+    frames = [east, west]
+    # this will remove the Division/Conference header lines
+    standings = pd.concat(frames).dropna()
+    standings = standings.loc[:,['Tm','W','L','W/L%']]
+    standings['playoffs'] = standings['Tm'].str.contains('\*').astype(int)
+    standings['games'] = standings['W'] + standings ['L']
+    standings['Tm'] = standings['Tm'].str.replace('[^\w\s]+','').str.replace('\d+\s*$','').str.strip()
+    standings = standings.replace({'Tm':teams}, regex=True)
+
+    voting['Tm'] = voting['Tm'].str.strip()
+    # merge datasets, joining on team name
+    voting_merge = pd.merge(voting, standings, on='Tm', how='left')
+    # append additional columns
+    #To-do!
+    if data.empty:
+        data = voting_merge
+    else:
+        frames = [data,voting_merge]
+        data = pd.concat(frames)
+
+# write to output
+output = "/Users/stevendungan/mvp/output"
+if not os.path.exists(output):
+    print(f"Creating directory \'{output}\'")
+    os.makedirs(output)
+data.to_csv(os.path.join(output,'dataframe.csv'))
