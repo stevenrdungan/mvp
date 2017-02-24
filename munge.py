@@ -29,6 +29,7 @@ teams = {'Atlanta Hawks':'ATL',
 'New Orleans Hornets':'NOH',
 'New Orleans Pelicans':'NOP',
 'New York Knicks':'NYK',
+'Oklahoma City Thunder':'OKC',
 'Orlando Magic':'ORL',
 'Philadelphia 76ers':'PHI',
 'Phoenix Suns':'PHO',
@@ -70,15 +71,18 @@ for year in range(2000,2017):
     standings = standings.replace({'Tm':teams}, regex=True)
 
     voting['Tm'] = voting['Tm'].str.strip()
-    # merge datasets, joining on team name
+    # drop records for players without team (i.e. players who were traded midseason)
+    voting = voting[voting.Tm !='TOT']
     voting_merge = pd.merge(voting, standings, on='Tm', how='left')
-    # append additional columns
-    #To-do!
+    voting_merge['gp_pct'] = voting_merge['G'] / voting_merge['games']
     if data.empty:
         data = voting_merge
     else:
         frames = [data,voting_merge]
         data = pd.concat(frames)
+
+data = data.sort_values('Share', ascending=False)
+data = data.drop(['Rank','First','Pts Won','Pts Max','W','L','games'], axis=1).reset_index(drop=True)
 
 # write to output
 output = "/Users/stevendungan/mvp/output"
