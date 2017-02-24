@@ -3,13 +3,18 @@ import re
 import pandas as pd
 import numpy as np
 
+#FINISH ADDING TEAMS!
 # key is 3LA, value is team name in standings
+# it is okay if there are duplicate values, because
+# they will never arise in the same season
+# e.g. Charlotte Hornets, Charlotte Bobcats
 teams = {'Dallas Mavericks':'DAL',
 'Detroit Pistons':'DET',
 'Indiana Pacers':'IND',
 'Los Angeles Lakers':'LAL',
 'Miami Heat':'MIA',
 'Minnesota Timberwolves':'MIN',
+'New York Knicks':'NYK',
 'Orlando Magic':'ORL',
 'Philadelphia 76ers':'PHI',
 'Phoenix Suns':'PHO',
@@ -43,4 +48,4 @@ standings = standings.loc[:,['Team','W','L','W/L%']]
 standings['playoffs'] = standings['Team'].str.contains('\*').astype(int)
 standings['games'] = standings['W'] + standings ['L']
 standings['Team'] = standings['Team'].str.replace('[^\w\s]+','').str.replace('\d+\s*$','')
-standings = standings.replace({'Team':teams}) # why is this not working??
+standings = standings.replace({'Team':teams}, regex=True)
