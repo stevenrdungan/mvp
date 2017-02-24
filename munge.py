@@ -41,3 +41,6 @@ frames = [east, west]
 standings = pd.concat(frames).dropna()
 standings = standings.loc[:,['Team','W','L','W/L%']]
 standings['playoffs'] = standings['Team'].str.contains('\*').astype(int)
+standings['games'] = standings['W'] + standings ['L']
+standings['Team'] = standings['Team'].str.replace('[^\w\s]+','').str.replace('\d+\s*$','')
+standings = standings.replace({'Team':teams}) # why is this not working??
