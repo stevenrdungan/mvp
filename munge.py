@@ -3,14 +3,10 @@ import re
 import pandas as pd
 import numpy as np
 
-# key is 3LA, value is team name in standings
-# it is okay if there are duplicate values, because
-# they will never arise in the same season
-# e.g. Charlotte Hornets, Charlotte Bobcats
 teams = {'Atlanta Hawks':'ATL',
 'Boston Celtics':'BOS',
 'Brooklyn Nets':'BRK',
-'Charlotte Bobcats':'CHA',
+'Charlotte Bobcats':'CHO',
 'Charlotte Hornets':'CHA',
 'Chicago Bulls':'CHI',
 'Cleveland Cavaliers':'CLE',
@@ -87,6 +83,9 @@ for year in range(2000,2017):
     standings['games'] = standings['W'] + standings ['L']
     standings['Tm'] = standings['Tm'].str.replace('[^\w\s]+','').str.replace('\d+\s*$','').str.strip()
     standings = standings.replace({'Tm':teams}, regex=True)
+    # if year is < 2003 replace CHA with CHH. ugly but it works!
+    if year < 2003:
+        standings['Tm'].replace('CHA','CHH', inplace=True)
     standings = standings.drop(['W','L'], axis=1)
     df_merge = pd.merge(stats, standings, on='Tm', how='left')
 
@@ -105,10 +104,9 @@ for year in range(2000,2017):
         data = pd.concat([data,df_merge])
 
 data = data.sort_values('Share', ascending=False)
-
 # output to csv
 outdir = os.path.join(os.getcwd(),'output')
 if not os.path.exists(outdir):
     print(f"Creating directory \'{outdir}\'")
     os.makedirs(outdir)
-data.to_csv(outdir + '/dataframe.csv')
+data.to_csv(outdir + '/dataframe.csv', index=False)
