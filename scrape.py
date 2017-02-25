@@ -22,6 +22,59 @@ if not os.path.exists(directory):
     print(f"Creating directory \'{directory}\'")
     os.makedirs(directory)
 
+
+# scrape player per game statistic data 2000-2017
+for year in range(2000,2018):
+    data = []
+    url = f"http://www.basketball-reference.com/leagues/NBA_{year}_per_game.html"
+    soup = get_response(url)
+    table = soup.find('table', attrs={'id':'per_game_stats'})
+    table_head = table.find('thead')
+    hrow = table_head.find('tr')
+    hcols = hrow.find_all('th')
+    hcols = [ele.text.strip() for ele in hcols]
+    data.append([ele for ele in hcols if ele])
+    table_body = table.find('tbody')
+    rows = table_body.find_all('tr')
+    for row in rows:
+        cols = [ele.text.strip() for ele in row.find_all('th')]
+        # ignore rows that contain header information
+        if cols[0] == 'Rk':
+            continue
+        cols += [ele.text.strip() for ele in row.find_all('td')]
+        # data.append([ele for ele in cols if ele])
+        # occasionally records representing pct are blank if num and denom are zero
+        data.append([ele for ele in cols])
+    fname = f"{directory}/{table.get('id')}_{year}.csv"
+    with open(fname, 'w') as file:
+        wr = csv.writer(file)
+        wr.writerows(data)
+
+# scrape player advanced statistic data 2000-2017
+for year in range(2000,2018):
+    data = []
+    url = f"http://www.basketball-reference.com/leagues/NBA_{year}_advanced.html"
+    soup = get_response(url)
+    table = soup.find('table', attrs={'id':'advanced_stats'})
+    table_head = table.find('thead')
+    hrow = table_head.find('tr')
+    hcols = hrow.find_all('th')
+    hcols = [ele.text.strip() for ele in hcols]
+    data.append([ele for ele in hcols if ele])
+    table_body = table.find('tbody')
+    rows = table_body.find_all('tr')
+    for row in rows:
+        cols = [ele.text.strip() for ele in row.find_all('th')]
+        # ignore rows that contain header information
+        if cols[0] == 'Rk':
+            continue
+        cols += [ele.text.strip() for ele in row.find_all('td')]
+        data.append([ele for ele in cols if ele])
+    fname = f"{directory}/{table.get('id')}_{year}.csv"
+    with open(fname, 'w') as file:
+        wr = csv.writer(file)
+        wr.writerows(data)
+
 # scrape MVP voting data 2000-16
 for year in range(2000,2017):
     data = []
@@ -53,9 +106,8 @@ for year in range(2000,2017):
         wr = csv.writer(file)
         wr.writerows(data)
 
-
-# scrape standings data 2000-16
-for year in range(2000,2017):
+# scrape standings data 2000-17
+for year in range(2000,2018):
     url = f"http://www.basketball-reference.com/leagues/NBA_{year}_standings.html"
     soup = get_response(url)
     tables = soup.find_all('table')

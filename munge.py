@@ -9,6 +9,7 @@ import numpy as np
 # e.g. Charlotte Hornets, Charlotte Bobcats
 teams = {'Atlanta Hawks':'ATL',
 'Boston Celtics':'BOS',
+'Brooklyn Nets':'BRK',
 'Charlotte Bobcats':'CHA',
 'Charlotte Hornets':'CHA',
 'Chicago Bulls':'CHI',
@@ -28,6 +29,7 @@ teams = {'Atlanta Hawks':'ATL',
 'New Jersey Nets':'NJN',
 'New Orleans Hornets':'NOH',
 'New Orleans Pelicans':'NOP',
+'New OrleansOklahoma City Hornets':'NOH',
 'New York Knicks':'NYK',
 'Oklahoma City Thunder':'OKC',
 'Orlando Magic':'ORL',
@@ -47,42 +49,62 @@ data = pd.DataFrame()   # this will be our dataset
 directory = os.path.join(os.getcwd(),'scrapedata')
 
 for year in range(2000,2017):
-    voting, east, west = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
+    # read data into DataFrames
+    pergame, advanced, voting, east, west = pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
     for filename in os.listdir(directory):
-        # read voting data into dataframe
-        if re.match(f"mvp_voting_{year}.csv", filename):
+        if re.match(f"per_game_stats_{year}.csv", filename):
+            pergame = pd.read_csv(os.path.join(directory,filename))
+        elif re.match(f"advanced_stats_{year}.csv", filename):
+            advanced = pd.read_csv(os.path.join(directory,filename))
+        elif re.match(f"mvp_voting_{year}.csv", filename):
             voting = pd.read_csv(os.path.join(directory,filename))
-        # read standings data into dataframe
         elif re.match(f"[a-z]+s_standings_E_{year}.csv", filename):
             east = pd.read_csv(os.path.join(directory,filename))
         elif re.match(f"[a-z]+s_standings_W_{year}.csv", filename):
             west = pd.read_csv(os.path.join(directory,filename))
 
-    # assemble standings dataframe
-    east = east.rename(columns = {'Eastern Conference':'Tm'})
-    west = west.rename(columns = {'Western Conference':'Tm'})
-    frames = [east, west]
+    # assemble stats dataframe
+    pergame = pergame.loc[:,['Player','Age','Tm','G','MP','TRB','AST','STL','BLK','PS/G']]
+    advanced = advanced.loc[:,['Player','Age','Tm','PER','TS%','USG%']]
+    stats = pd.merge(pergame, advanced, on=['Player','Age','Tm'], how='left')
+    # drop all duplicate rows (i.e. players who played on multiple teams in same season)
+    stats = stats.drop_duplicates(subset=['Player','Age'], keep=False)
+    # only keep rows for players playing 25 minutes per game or more
+    stats = stats[stats.MP >= 25.0]
+    # box is sum of rebounds, assists, steals, blocks
+    stats['box'] = stats['TRB'] + stats['AST'] + stats['STL'] + stats['BLK']
+
+    # assemble standings dataframe. sort so that 2017 playoff teams can be easily determined
+    east = east.rename(columns = {'Eastern Conference':'Tm'}).sort_values('W/L%', ascending=False).reset_index(drop=True)
+    west = west.rename(columns = {'Western Conference':'Tm'}).sort_values('W/L%', ascending=False).reset_index(drop=True)
     # this will remove the Division/Conference header lines
-    standings = pd.concat(frames).dropna()
+    standings = pd.concat([east, west]).dropna()
     standings = standings.loc[:,['Tm','W','L','W/L%']]
     standings['playoffs'] = standings['Tm'].str.contains('\*').astype(int)
+    # assume playoffs for top 8 teams in each conference
+    if year == 2017:
+        standings['playoffs'][standings.index < 8] = 1
     standings['games'] = standings['W'] + standings ['L']
     standings['Tm'] = standings['Tm'].str.replace('[^\w\s]+','').str.replace('\d+\s*$','').str.strip()
     standings = standings.replace({'Tm':teams}, regex=True)
+    standings = standings.drop(['W','L'], axis=1)
+    df_merge = pd.merge(stats, standings, on='Tm', how='left')
 
+    # assemble voting dataframe
     voting['Tm'] = voting['Tm'].str.strip()
-    # drop records for players without team (i.e. players who were traded midseason)
-    voting = voting[voting.Tm !='TOT']
-    voting_merge = pd.merge(voting, standings, on='Tm', how='left')
-    voting_merge['gp_pct'] = voting_merge['G'] / voting_merge['games']
+    voting = voting.loc[:,['Player','Age','Tm','Share']]
+    df_merge = pd.merge(df_merge, voting, on=['Player', 'Age','Tm'], how='left')
+
+    #final cleanup of df_merge
+    df_merge['gp_pct'] = df_merge['G'] / df_merge['games']
+    df_merge['Share'].fillna(0, inplace=True)
+    df_merge = df_merge.drop(['G','games'], axis=1)
     if data.empty:
-        data = voting_merge
+        data = df_merge
     else:
-        frames = [data,voting_merge]
-        data = pd.concat(frames)
+        data = pd.concat([data,df_merge])
 
 data = data.sort_values('Share', ascending=False)
-data = data.drop(['Rank','First','Pts Won','Pts Max','W','L','games'], axis=1).reset_index(drop=True)
 
 # output to csv
 outdir = os.path.join(os.getcwd(),'output')
