@@ -23,8 +23,8 @@ if not os.path.exists(directory):
     os.makedirs(directory)
 
 
-# scrape player per game statistic data 2000-2017
-for year in range(2000,2018):
+# scrape player per game statistic data 2000-2016
+for year in range(2000,2017):
     data = []
     url = f"http://www.basketball-reference.com/leagues/NBA_{year}_per_game.html"
     soup = get_response(url)
@@ -50,8 +50,8 @@ for year in range(2000,2018):
         wr = csv.writer(file)
         wr.writerows(data)
 
-# scrape player advanced statistic data 2000-2017
-for year in range(2000,2018):
+# scrape player advanced statistic data 2000-2016
+for year in range(2000,2017):
     data = []
     url = f"http://www.basketball-reference.com/leagues/NBA_{year}_advanced.html"
     soup = get_response(url)
@@ -106,8 +106,8 @@ for year in range(2000,2017):
         wr = csv.writer(file)
         wr.writerows(data)
 
-# scrape standings data 2000-17
-for year in range(2000,2018):
+# scrape standings data 2000-16
+for year in range(2000,2017):
     url = f"http://www.basketball-reference.com/leagues/NBA_{year}_standings.html"
     soup = get_response(url)
     tables = soup.find_all('table')

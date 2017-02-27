@@ -63,6 +63,7 @@ for year in range(2000,2017):
     pergame = pergame.loc[:,['Player','Age','Tm','G','MP','TRB','AST','STL','BLK','PS/G']]
     advanced = advanced.loc[:,['Player','Age','Tm','PER','TS%','USG%']]
     stats = pd.merge(pergame, advanced, on=['Player','Age','Tm'], how='left')
+    stats['Year'] = year
     # drop all duplicate rows (i.e. players who played on multiple teams in same season)
     stats = stats.drop_duplicates(subset=['Player','Age'], keep=False)
     # only keep rows for players playing 25 minutes per game or more
@@ -89,14 +90,18 @@ for year in range(2000,2017):
     standings = standings.drop(['W','L'], axis=1)
     df_merge = pd.merge(stats, standings, on='Tm', how='left')
 
+    if not voting.empty:
     # assemble voting dataframe
-    voting['Tm'] = voting['Tm'].str.strip()
-    voting = voting.loc[:,['Player','Age','Tm','Share']]
-    df_merge = pd.merge(df_merge, voting, on=['Player', 'Age','Tm'], how='left')
-
-    #final cleanup of df_merge
+        voting['Tm'] = voting['Tm'].str.strip()
+        voting = voting.loc[:,['Player','Age','Tm','Share']]
+        df_merge = pd.merge(df_merge, voting, on=['Player', 'Age','Tm'], how='left')
+        #final cleanup of df_merge
+        df_merge['got_votes'] = (df_merge['Share'] > 0).astype(int)
+        df_merge['Share'].fillna(0, inplace=True)
+    else:
+        df_merge['got_votes'] = np.nan
+        df_merge['Share']= np.nan
     df_merge['gp_pct'] = df_merge['G'] / df_merge['games']
-    df_merge['Share'].fillna(0, inplace=True)
     df_merge = df_merge.drop(['G','games'], axis=1)
     if data.empty:
         data = df_merge
