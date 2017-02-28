@@ -3,12 +3,12 @@
 ## Overview
 This project will consist of several parts:
 
-1)Data scrape
-2)Data munge
-3)Visualizations
-4)Analysis
-5)Forecasting model
-6)Projecting 2017 MVP voting
+1. Data scrape
+2. Data munge
+3. Visualizations
+4. Analysis
+5. Forecasting model
+6. Projecting 2017 MVP voting
 
 
 ## Data
