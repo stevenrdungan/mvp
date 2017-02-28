@@ -1,8 +1,13 @@
-# Forecasting the 2017 NBA MVP
+# Analysis of 2000-16 NBA Most Valuable Player Data
 
 ## Overview
-
-
+This project will consist of several parts:
+1) Data scrape
+2) Data munge
+3) Visualizations
+4) Analysis
+5) Forecasting model
+6) Projecting 2017 MVP voting
 
 
 ## Data
@@ -11,6 +16,8 @@
 
 Data was obtained from basketball-reference.com. The following data was captured:
 
+* Player statistic data for the 200-16 seasons
+* Player advanced statistic data for the 2000-16 seasons
 * MVP award voting data for the 2000-16 seasons
 * Team final standings data for the 2000-16 seasons
 
@@ -33,39 +40,24 @@ I'll address data quality later, but suffice it to say for now that I trust that
 
 ### Munge
 
-To prepare data for analysis, I'll put relevant data in a Pandas DataFrame. This DataFrame should be composed of Series' for each record in the MVP award voting data. In addition to the fields already present for each player record, the following fields need to be appended:
+To prepare data for analysis, I'll put relevant data in a Pandas DataFrame. Our final dataset should have a record for each player season, including statistics, team performance, and MVP voting data.
 
 * % of team's games played
 * Player's team winning percentage
 * Whether player's team made playoffs or not (1 or 0)
 
-A 'voting' file looks like:
-> Rank,Player,Age,Tm,First,Pts Won,Pts Max,Share,G,MP,PTS,TRB,AST,STL,BLK,FG%,3P%,FT%,WS,WS/48
-> 1,Shaquille O'Neal,27,LAL,120.0,1207.0,1210,0.998,79,40.0,29.7,13.6,3.8,0.5,3.0,.574,.000,.524,18.6,.283
-> 2,Kevin Garnett,23,MIN,0.0,408.0,1210,0.337,81,40.0,22.9,11.8,5.0,1.5,1.6,.497,.370,.765,11.6,.172
+Our approach will be:
+* Create a dataframe for basic and advanced statistics, then join them
+* Create a dataframe for standings data, then join the relevant data to the statistics dataframe
+* Create a dataframe for MVP voting data, then join the relevant data to the statistics dataframe
 
-A 'standings' file looks like:
-> Eastern Conference,W,L,W/L%,GB,PS/G,PA/G,SRS
-> Atlantic Division
-> Miami Heat* (2),52,30,.634,—,94.4,91.3,2.75
-> New York Knicks* (3),50,32,.610,2.0,92.1,90.7,1.30
-> Philadelphia 76ers* (5),49,33,.598,3.0,94.8,93.4,1.02
+To help reduce noise and outliers, we will remove any players averaging less than 25 minutes per game. We will also drop any players who played for multiple teams in any season - although several such players have received MVP votes, none have come close to winning. Removing this small subset does help simplify munging later on when joining dataframe by team name. We also use a regular expression to remove '*' characters from player names.
 
-We can create a DataFrame of the voting data, to which we will append additional fields, as well as DataFrames for each of the standings data files.
+For the standings data, we want to add additional Series' for games played (so we can determine winning percentage and, later on, percentage of games played by a player), as well as whether the team made the playoffs. We used some regular expression wrangling and a dictionary to translate full team names into three letter abbreviations. One ad-hoc fix was necessary- the original Charlotte Hornets used a different three letter identifier than the current Charlotte Hornets. Rather than iterate through different dictionaries by year, we simply replace the new acronym with the old acronym depending on the year of the series.
 
-For each of the 'standings' DataFrames, we can modify each record:
-* Append a 'games' column by adding wins and losses
-* Append a 'win_pct' column by dividing wins by games
-* Append a 'playoffs' column, using 1 if a team name has an asterisk, 0 if not
-* Use regular expression parsing to truncate a team's name to remove non-alphanumeric characters, except separating spaces
+We want to then append the voting data to the main dataframe, adding an additional column for if the player received votes or not.
 
-We can also do some cleaning of the 'voting' DataFrame:
-* remove any records for players with a team of 'TOT' (indicating they played for multiple teams that season)
-Then, merge these two DataFrames. Once we have our formulated 'standings' DataFrames, we can alter the 'voting' DataFrame as follows:
-* Append the columns we created in our 'standings' DataFrames, joining using a dictionary to match team acronym (e.g. 'LAL') to team name ('Los Angeles Lakers')
-* Create a 'pct_games' field by dividing player games played by total team games
-
-Do this for each year, and merge them to create our final DataFrame object. We can then sort by 'Share' (share of voting points won), and drop any extraneous columns.
+We perform these steps for each year, and merge them all together to create our final DataFrame object. We can then sort by 'Share' (share of voting points won), and drop any extraneous columns.
 
 **Relevant Code Files**: munge.py
 
