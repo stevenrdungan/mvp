@@ -2,12 +2,13 @@
 
 ## Overview
 This project will consist of several parts:
-1) Data scrape
-2) Data munge
-3) Visualizations
-4) Analysis
-5) Forecasting model
-6) Projecting 2017 MVP voting
+
+1)Data scrape
+2)Data munge
+3)Visualizations
+4)Analysis
+5)Forecasting model
+6)Projecting 2017 MVP voting
 
 
 ## Data
@@ -41,10 +42,6 @@ I'll address data quality later, but suffice it to say for now that I trust that
 ### Munge
 
 To prepare data for analysis, I'll put relevant data in a Pandas DataFrame. Our final dataset should have a record for each player season, including statistics, team performance, and MVP voting data.
-
-* % of team's games played
-* Player's team winning percentage
-* Whether player's team made playoffs or not (1 or 0)
 
 Our approach will be:
 * Create a dataframe for basic and advanced statistics, then join them
@@ -80,6 +77,6 @@ To replicate:
 2. Run *scrape.py* to retrieve raw data
 3. Run *munge.py* to create final DataFrame and output file
 
-**Required Software Packages/Libraries:** Python3, BeautifulSoup4, Requests, Pandas, Numpy
+**Required Software Packages/Libraries:** Python3, BeautifulSoup4, Requests, Pandas, Numpy, Bokeh
 
 Or, you can just install the appropriate Anaconda package.
