@@ -6,8 +6,8 @@ import numpy as np
 teams = {'Atlanta Hawks':'ATL',
 'Boston Celtics':'BOS',
 'Brooklyn Nets':'BRK',
-'Charlotte Bobcats':'CHO',
-'Charlotte Hornets':'CHA',
+'Charlotte Bobcats':'CHA',
+'Charlotte Hornets':'CHO',
 'Chicago Bulls':'CHI',
 'Cleveland Cavaliers':'CLE',
 'Dallas Mavericks':'DAL',
@@ -25,7 +25,7 @@ teams = {'Atlanta Hawks':'ATL',
 'New Jersey Nets':'NJN',
 'New Orleans Hornets':'NOH',
 'New Orleans Pelicans':'NOP',
-'New OrleansOklahoma City Hornets':'NOH',
+'New OrleansOklahoma City Hornets':'NOK',
 'New York Knicks':'NYK',
 'Oklahoma City Thunder':'OKC',
 'Orlando Magic':'ORL',
@@ -64,6 +64,8 @@ for year in range(2000,2017):
     advanced = advanced.loc[:,['Player','Age','Tm','PER','TS%','USG%']]
     stats = pd.merge(pergame, advanced, on=['Player','Age','Tm'], how='left')
     stats['Year'] = year
+    # remove asterisk symbol from player name
+    stats['Player'].replace(to_replace=r'\*', value=r'', regex=True, inplace=True)
     # drop all duplicate rows (i.e. players who played on multiple teams in same season)
     stats = stats.drop_duplicates(subset=['Player','Age'], keep=False)
     # only keep rows for players playing 25 minutes per game or more
@@ -86,7 +88,7 @@ for year in range(2000,2017):
     standings = standings.replace({'Tm':teams}, regex=True)
     # if year is < 2003 replace CHA with CHH. ugly but it works!
     if year < 2003:
-        standings['Tm'].replace('CHA','CHH', inplace=True)
+        standings['Tm'].replace('CHO','CHH', inplace=True)
     standings = standings.drop(['W','L'], axis=1)
     df_merge = pd.merge(stats, standings, on='Tm', how='left')
 
