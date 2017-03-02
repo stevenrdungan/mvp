@@ -5,24 +5,25 @@ import pandas as pd
 
 from bokeh.layouts import row, widgetbox
 from bokeh.models import ColumnDataSource, CustomJS
-from bokeh.models.widgets import Slider, Button, DataTable, TableColumn, NumberFormatter
+from bokeh.models.widgets import Slider, Button, DataTable, TableColumn, NumberFormatter, RangeSlider
 from bokeh.io import curdoc
 
 df = pd.read_csv(join(dirname(__file__), 'dataframe.csv')).loc[:,['Year','Player','Share']]
 source = ColumnDataSource(data=dict())
 
 def update():
-    current = df[df['Share'] <= slider.value].dropna()
+    current = df[(df['Share'] >= range_slider.range[0]) & (df['Share'] <= range_slider.range[1])].dropna().reset_index(drop=True)
     source.data = {
         'Year'             : current.Year,
         'Player'           : current.Player,
         'Share'            : current.Share,
     }
 
-slider = Slider(title="Vote Share", start=0.0, end=1.0, value=1.0, step=.01)
-slider.on_change('value', lambda attr, old, new: update())
+range_slider = RangeSlider(title="Share Range", start=0.0, end=1.0, step=.01, range = (0.0,1.0))
+range_slider.on_change('range', lambda attr, old, new: update())
 
-button = Button(label="Export CSV", button_type="success")
+#TODO: implement export to json
+button = Button(label="Export Data", button_type="success")
 button.callback = CustomJS(args=dict(source=source),
                            code=open(join(dirname(__file__), "download_csv.js")).read())
 
@@ -34,7 +35,7 @@ columns = [
 
 data_table = DataTable(source=source, columns=columns, width=800)
 
-controls = widgetbox(slider, button)
+controls = widgetbox(range_slider, button)
 table = widgetbox(data_table)
 
 curdoc().add_root(row(controls, table))
