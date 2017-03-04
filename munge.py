@@ -40,7 +40,7 @@ teams = {'Atlanta Hawks':'ATL',
 'Vancouver Grizzlies':'VAN',
 'Washington Wizards':'WAS'}
 
-
+pd.set_option('precision', 3)
 data = pd.DataFrame()   # this will be our dataset
 directory = os.path.join(os.getcwd(),'scrapedata')
 
@@ -111,9 +111,13 @@ for year in range(2000,2017):
         data = pd.concat([data,df_merge])
 
 data = data.sort_values('Share', ascending=False)
+data['Share'] = data['Share'].map(lambda x: '{0:.3}'.format(x))
+data['TS%'] = data['TS%'].map(lambda x: '{0:.3}'.format(x))
+data['W/L%'] = data['W/L%'].map(lambda x: '{0:.3}'.format(x))
+data['gp_pct'] = data['gp_pct'].map(lambda x: '{0:.3}'.format(x))
 # output to csv
 outdir = os.path.join(os.getcwd(),'output')
 if not os.path.exists(outdir):
     print(f"Creating directory \'{outdir}\'")
     os.makedirs(outdir)
-data.to_csv(outdir + '/dataframe.csv', index=False)
+data.to_csv(outdir + '/dataframe.csv', index=False, float_format='%.1f')
