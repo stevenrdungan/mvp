@@ -16,16 +16,20 @@ def update():
     source.data = {
         'Year'             : current.Year,
         'Player'           : current.Player,
-        'Share'            : current.Share,
+        'Share'            : current.Share.map(lambda x: '{0:.3g}'.format(x))
+,
     }
 
 range_slider = RangeSlider(title="Share Range", start=0.0, end=1.0, step=.01, range = (0.0,1.0))
 range_slider.on_change('range', lambda attr, old, new: update())
 
-#TODO: implement export to json
-button = Button(label="Export Data", button_type="success")
-button.callback = CustomJS(args=dict(source=source),
+button1 = Button(label="Export CSV", button_type="success")
+button1.callback = CustomJS(args=dict(source=source),
                            code=open(join(dirname(__file__), "download_csv.js")).read())
+
+button2 = Button(label="Export JSON", button_type="success")
+button2.callback = CustomJS(args=dict(source=source),
+                           code=open(join(dirname(__file__), "download_json.js")).read())
 
 columns = [
     TableColumn(field="Year", title="Year"),
@@ -33,9 +37,9 @@ columns = [
     TableColumn(field="Share", title="Share")
 ]
 
-data_table = DataTable(source=source, columns=columns, width=800)
+data_table = DataTable(source=source, columns=columns, width=800, height=600)
 
-controls = widgetbox(range_slider, button)
+controls = widgetbox(range_slider, button1, button2)
 table = widgetbox(data_table)
 
 curdoc().add_root(row(controls, table))
